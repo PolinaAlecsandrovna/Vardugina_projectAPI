@@ -125,6 +125,17 @@ namespace Vardugina_project.Services
                 Lessons = new List<LessonDto>()
             };
         }
+        public async Task<List<GroupDto>> GetAllGroupsAsync()
+        {
+            return await _db.StudentGroups
+                .Select(g => new GroupDto
+                {
+                    GroupId = g.GroupId,
+                    GroupName = g.GroupName
+                })
+                .OrderBy(g => g.GroupName)
+                .ToListAsync();
+        }
 
     }
 }

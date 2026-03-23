@@ -3,15 +3,18 @@ using Vardugina_project.Data;
 using Vardugina_project.DTO;
 using Vardugina_project.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Vardugina_project.Services
 {
     public class ScheduleService : IScheduleService
     {
         private readonly AppDbContext _db;
-        public ScheduleService(AppDbContext db)
+        private readonly ILogger<ScheduleService> _logger;
+        public ScheduleService(AppDbContext db, ILogger<ScheduleService> logger)
         {
             _db = db;
+            _logger = logger;
         }
         public async Task<List<ScheduleByDateDto>> GetScheduleForGroup(string groupName, DateTime startDate, DateTime endDate)
         {
@@ -127,14 +130,28 @@ namespace Vardugina_project.Services
         }
         public async Task<List<GroupDto>> GetAllGroupsAsync()
         {
-            return await _db.StudentGroups
-                .Select(g => new GroupDto
-                {
-                    GroupId = g.GroupId,
-                    GroupName = g.GroupName
-                })
-                .OrderBy(g => g.GroupName)
-                .ToListAsync();
+            try
+            {
+
+                var groups = await _db.StudentGroups
+                    .Include(g => g.Specialty)
+                    .OrderBy(g => g.GroupName)
+                    .Select(g => new GroupDto
+                    {
+                        GroupId = g.GroupId,
+                        GroupName = g.GroupName,
+                        Course = g.Course,
+                        Specialty = g.Specialty.Name
+                    })
+                    .ToListAsync();
+
+                return groups;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении списка групп");
+                throw;
+            }
         }
 
     }

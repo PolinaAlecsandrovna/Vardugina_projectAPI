@@ -6,5 +6,6 @@ namespace Vardugina_project.Services
     {
         Task<List<ScheduleByDateDto>> GetScheduleForGroup(string groupName, DateTime startDate, DateTime endDate);
         Task<List<GroupDto>> GetAllGroupsAsync();
+        
     }
 }
